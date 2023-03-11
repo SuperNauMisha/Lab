@@ -15,6 +15,7 @@ class MyWidget(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('main.ui', self)
+        self.setWindowTitle("Коагулограф")
         self.dt_now = datetime.datetime.today()
         self.dateTimeEdit.setDateTime(self.dt_now)
         self.interferences = 0
@@ -79,6 +80,7 @@ class MyWidget(QMainWindow):
         self.conditionEdit.clear()
         self.dt_now = datetime.datetime.today()
         self.dateTimeEdit.setDateTime(self.dt_now)
+        self.graph.clear()
 
     def onRead(self):
         try:
@@ -125,11 +127,16 @@ class MyWidget(QMainWindow):
         for col in range(len(data_patient)):
             cell = sheet.cell(row=col + 1, column=4)
             cell.value = data_patient[col]
-
-        filename = QFileDialog.getSaveFileName(self, "Сохранить в таблицу", str(data_patient[1].split()[0]) + '_' +\
-                                               self.dateTimeEdit.dateTime().toString('dd-MM-yyyy_hh-mm'), "*.xlsx")
+        try:
+            filename = QFileDialog.getSaveFileName(self, "Сохранить в таблицу", str(data_patient[1].split()[0]) + '_' +\
+                                                   self.dateTimeEdit.dateTime().toString('dd-MM-yyyy_hh-mm'), "*.xlsx")
+        except:
+            filename = QFileDialog.getSaveFileName(self, "Сохранить в таблицу", '', "*.xlsx")
         print(filename)
-        wb.save(filename[0])
+        try:
+            wb.save(filename[0])
+        except:
+            print('Save error')
 
 
 if __name__ == '__main__':
