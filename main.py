@@ -1,5 +1,6 @@
 import sys
 import datetime
+import numpy as np
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDateTimeEdit, QPushButton
 from PyQt5.QtSerialPort import QSerialPort, QSerialPortInfo
@@ -24,11 +25,12 @@ class MyWidget(QMainWindow):
         self.saveButton.clicked.connect(self.save)
         self.clearButton.clicked.connect(self.onClear)
         self.importButton.clicked.connect(self.onImport)
+        self.calculateButon.clicked.connect(self.calculate)
         self.serial = QSerialPort()
         self.serial.setBaudRate(9600)
         self.isConnected = False
         self.graph.disableAutoRange()
-        self.graph.setLimits(yMin=0, yMax=250, xMin=0, xMax=1600)
+        self.graph.setLimits(yMin=-10, yMax=250, xMin=0, xMax=1600)
         self.graph.setBackground('w')
         self.pen = pg.mkPen(color=(255, 0, 0))
 
@@ -181,7 +183,7 @@ class MyWidget(QMainWindow):
                 self.data_list.append(val)
         self.graph.plot(self.time, self.data_list, pen=self.pen)
         self.graph.disableAutoRange()
-        self.graph.setLimits(yMin=0, yMax=250, xMin=0, xMax=1600)
+        self.graph.setLimits(yMin=-10, yMax=250, xMin=0, xMax=1600)
         try:
             data_patient = []
             for row in range(len(self.named_data_patient)):
@@ -206,6 +208,97 @@ class MyWidget(QMainWindow):
             self.ddimerEdit.setValue(data_patient[11])
         except:
             pass
+
+    def calculate(self):
+        sigma = 0.25 #допуск для "плато" в долях
+        period = 20
+        print()
+        data = np.array([np.array(self.time), np.array(self.data_list)])
+        print(type(data))
+        # (data[0, :] - координата времени, сек; data[1, :] - значение прибора(?), соответсвующий данному моменту времени).
+        datanorm = self.contour(data, period) #перестраиваем на верхние и нижние пики. datanorm - четырёхмерный массив (NumPy):
+        #(datanorm[0, :] - время верхних пиков, сек; datanorm[1, :] - значение верхних пиков; datanorm[2, :] - время нижних пиков, сек; datanorm[3, :] - значение нижних пиков).
+        zeroboard = self.zeropoint(datanorm, np.min(data[1, :])) #граница ухода с начального плато (плато нулей) (одномерный массив (NumPy): [0] - координата границы, сек; [1] - индекс этой точки в datanorm).
+        deltamin = self.mindeltapoint(datanorm, zeroboard[1]) # точка с минимальной шириной графика (одномерный массив (NumPy): [0] - ширина; [1] - координата, сек).
+        plato = self.platopoint(datanorm, zeroboard[1], deltamin, sigma) # границы центрального плато (возле deltamin) plato - двухмерный массив (NumPy):
+        #([0/1/2, 0]- координата левой/правой/трёхминутной границы, сек; [0/1/2, 1] - ширина графика в точке левой/правой/трёхминутной границы).
+        #трёхминутная граница - точка, отстоящая от правой границы плато на 3 минуты.
+
+        #рисуем график
+        # любой из элементоф графика можно отключить, закомментировав его
+        # self.graph.plot(data[0,:],data[1,:])
+        self.graph.plot(datanorm[0,:],datanorm[1,:], pen=pg.mkPen(color=(0, 0, 255)))
+        self.graph.plot(datanorm[2,:],datanorm[3,:], pen=pg.mkPen(color=(0, 0, 255)))
+        self.graph.plot([zeroboard[0], zeroboard[0]],[np.min(data[1, :])-10, np.max(data[1, :])+10], name="dsf", pen=pg.mkPen(color=(142, 61, 0), width=2))
+        self.graph.plot([deltamin[1], deltamin[1]],[np.min(data[1, :])-10, np.max(data[1, :])+10], pen=pg.mkPen(color=(255, 0, 255), width=2))
+        self.graph.plot([plato[0,0], plato[0,0]],[np.min(data[1, :])-10, np.max(data[1, :])+10], pen=pg.mkPen(color=(255, 0, 166), width=2))
+        self.graph.plot([plato[1,0], plato[1,0]],[np.min(data[1, :])-10, np.max(data[1, :])+10], pen=pg.mkPen(color=(255, 165, 0), width=2))
+        self.graph.plot([plato[2,0], plato[2,0]],[np.min(data[1, :])-10, np.max(data[1, :])+10], pen=pg.mkPen(color=(0, 100, 100), width=2))
+        self.graph.showGrid(x=True, y=True)
+
+
+
+    def contour(self, data, period):
+        lendata = len(data[1, :])
+        datanorm = np.zeros((4, lendata//period+1))
+
+
+        maxloc = 0
+        minloc = 0
+        countnorm = 0
+
+        for i in range(0, lendata, period):
+            maxloc = np.argmax(data[1, i:i+period])
+            minloc = np.argmin(data[1, i:i+period])
+            datanorm[0,countnorm] = data[0,i+maxloc]
+            datanorm[1,countnorm] = data[1,i+maxloc]
+            datanorm[2,countnorm] = data[0,i+minloc]
+            datanorm[3,countnorm] = data[1,i+minloc]
+            countnorm = countnorm+1
+        return datanorm
+
+
+    def zeropoint(self, datanorm, min_of_data): #min_of_data = np.min(data[1, :])
+        zeroboard = np.array([0,0])
+        for countnorm in range(len(datanorm[1, :])):
+            if (countnorm>2) and (datanorm[3, countnorm] > min_of_data) and (datanorm[3, countnorm-1] > min_of_data) and (datanorm[3, countnorm-2] >= min_of_data):
+                zeroboard[0] = datanorm[2, countnorm-2]
+                zeroboard[1] = countnorm-2
+                break
+        return zeroboard
+
+
+    def mindeltapoint(self, datanorm, zeroindex): #zeroindex = zeroboard[1]
+        height = np.max(datanorm[1,:])-np.min(datanorm[1, :])
+        deltamin = np.array([height, 0])
+        for countnorm in range(zeroindex,len(datanorm[1, :])):
+            delta = datanorm[1, countnorm] - datanorm[3, countnorm]
+            if (delta < deltamin[0]):
+                deltamin[0] = delta
+                deltamin[1] = (datanorm[0, countnorm]+datanorm[2, countnorm])/2
+        return deltamin
+
+
+    def platopoint(self, datanorm, zeroindex, deltamin, sigma):
+        plato = np.array([[0,0], [0, 0], [0,0]])
+        stopper = 0
+        rightindex = 0
+        for i in range(zeroindex, len(datanorm[1, :])):
+            deltanext = datanorm[1, i] - datanorm[3, i]
+            delta = datanorm[1, i-1] - datanorm[3, i-1]
+            deltalast = datanorm[1, i-2] - datanorm[3, i-2]
+            if (delta <= deltamin[0]*(1+sigma)) and (deltanext <= deltamin[0]*(1+sigma)) and (deltalast <= deltamin[0]*(1+sigma)):
+                if stopper == 0 :
+                    stopper = 1
+                    plato[0,0] = (datanorm[0,i-2]+datanorm[2, i-2])/2
+                    plato[0,1] = deltalast
+                plato[1,0] = (datanorm[0,i]+datanorm[2, i])/2
+                plato[1,1] = deltanext
+                rightindex = i
+        rightindex = np.min([rightindex+18, len(datanorm[1, :])-1])
+        plato[2,0] = (datanorm[0,rightindex]+datanorm[2, rightindex])/2 #+3минуты
+        plato[2,1] = datanorm[1, rightindex] - datanorm[3, rightindex]
+        return plato
 
 
 
