@@ -16,6 +16,12 @@ class MyWidget(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('main.ui', self)
+
+
+        self.maxTopValue = 250
+        self.maxRightValue = 1600
+
+
         self.setWindowTitle("Коагулограф")
         self.dt_now = datetime.datetime.today()
         self.dateTimeEdit.setDateTime(self.dt_now)
@@ -29,13 +35,15 @@ class MyWidget(QMainWindow):
         self.serial = QSerialPort()
         self.serial.setBaudRate(9600)
         self.isConnected = False
+        self.graph_data = []
+        self.graph.addLegend()
         self.graph.disableAutoRange()
-        self.graph.setLimits(yMin=-10, yMax=250, xMin=0, xMax=1600)
+        self.graph.setLimits(yMin=-10, yMax=100, xMin=0, xMax=self.maxRightValue)
         self.graph.setBackground('w')
         self.pen = pg.mkPen(color=(255, 0, 0))
 
-        self.named_data_patient = ["Дата и время", "Дополнительные дата и время", "ФИО", "№ Истории болезни", "Диагноз", "Обстоятельства", \
-                              "Фибриноген", "ПТИ", "МНО", "АЧТВ", "ACT", "Д-Димер"]
+        self.named_data_patient = ["Дата и время", "Дополнительные дата и время", "ФИО", "№ Истории болезни",
+                                   "Диагноз", "Обстоятельства", "Фибриноген", "ПТИ", "МНО", "АЧТВ", "ACT", "Д-Димер"]
         self.interferences = 0
         self.data_list = []
         self.time = []
@@ -78,11 +86,13 @@ class MyWidget(QMainWindow):
         self.serial.close()
 
     def onClear(self):
+        self.onDisconnect()
         self.interferences = 0
         self.oldstrok_data = ''
         self.strok_data = ''
         self.data_list = []
         self.time = []
+        self.graph_data = []
         self.now_time = 0
         self.nameEdit.setText('')
         self.numEdit.setText('')
@@ -114,18 +124,18 @@ class MyWidget(QMainWindow):
                     self.data_list.append(int(str(self.oldstrok_data + self.strok_data)[0:-4]))
                     self.oldstrok_data = ''
                     self.time.append(self.now_time)
-
-                    self.graph.plot(self.time, self.data_listб, pen=self.pen)
+                    norm_data_list = [int(item / self.maxTopValue * 100) for item in self.data_list]
+                    self.graph.plot(self.time, norm_data_list, pen=self.pen)
 
                     self.now_time += 0.5
         except Exception as err:
             print("err", err)
 
     def save(self):
-        data_patient = [self.dateTimeEdit.dateTime().toString('dd.MM.yyyy hh:mm'), \
-                        self.dateTimeEdit_2.dateTime().toString('dd.MM.yyyy hh:mm'), self.nameEdit.text(),\
-                        self.numEdit.text(), self.diagnosisEdit.toPlainText(), self.conditionEdit.toPlainText(), \
-                        self.fibrinogenEdit.value(), self.ptiEdit.value(), self.mnoEdit.value(), self.actvEdit.value(),\
+        data_patient = [self.dateTimeEdit.dateTime().toString('dd.MM.yyyy hh:mm'),
+                        self.dateTimeEdit_2.dateTime().toString('dd.MM.yyyy hh:mm'), self.nameEdit.text(),
+                        self.numEdit.text(), self.diagnosisEdit.toPlainText(), self.conditionEdit.toPlainText(),
+                        self.fibrinogenEdit.value(), self.ptiEdit.value(), self.mnoEdit.value(), self.actvEdit.value(),
                         self.actEdit.value(), self.ddimerEdit.value()]
         wb = openpyxl.Workbook()
         wb.create_sheet(title='Первый лист', index=0)
@@ -139,17 +149,19 @@ class MyWidget(QMainWindow):
             cell = sheet.cell(row=row + 1, column=2)
             cell.value = self.data_list[row]
 
-        for row in range(len(self.named_data_patient)):
+        all_name_data = self.named_data_patient + self.named_graph_data
+        for row in range(len(all_name_data)):
             cell = sheet.cell(row=row + 1, column=3)
-            cell.value = self.named_data_patient[row]
+            cell.value = all_name_data[row]
 
-        for row in range(len(data_patient)):
+        all_data = data_patient + self.graph_data
+        for row in range(len(all_data)):
             cell = sheet.cell(row=row + 1, column=4)
-            cell.value = data_patient[row]
+            cell.value = all_data[row]
         print(data_patient)
         try:
-            filename = QFileDialog.getSaveFileName(self, "Сохранить в таблицу", \
-                                                   str(self.nameEdit.text().split()[0]) + '_' +\
+            filename = QFileDialog.getSaveFileName(self, "Сохранить в таблицу",
+                                                   str(self.nameEdit.text().split()[0]) + '_' +
                                                    self.dateTimeEdit.dateTime().toString('dd-MM-yyyy_hh-mm'), "*.xlsx")
         except:
             filename = QFileDialog.getSaveFileName(self, "Сохранить в таблицу", '', "*.xlsx")
@@ -181,9 +193,10 @@ class MyWidget(QMainWindow):
                 cell = sheet.cell(row=row, column=2)
                 val = cell.value
                 self.data_list.append(val)
-        self.graph.plot(self.time, self.data_list, pen=self.pen)
+        norm_data_list = [int(item / self.maxTopValue * 100) for item in self.data_list]
+        self.graph.plot(self.time, norm_data_list, pen=self.pen)
         self.graph.disableAutoRange()
-        self.graph.setLimits(yMin=-10, yMax=250, xMin=0, xMax=1600)
+        self.graph.setLimits(yMin=-10, yMax=100, xMin=0, xMax=self.maxRightValue)
         try:
             data_patient = []
             for row in range(len(self.named_data_patient)):
@@ -210,31 +223,46 @@ class MyWidget(QMainWindow):
             pass
 
     def calculate(self):
-        sigma = 0.25 #допуск для "плато" в долях
-        period = 20
-        print()
-        data = np.array([np.array(self.time), np.array(self.data_list)])
-        print(type(data))
-        # (data[0, :] - координата времени, сек; data[1, :] - значение прибора(?), соответсвующий данному моменту времени).
-        datanorm = self.contour(data, period) #перестраиваем на верхние и нижние пики. datanorm - четырёхмерный массив (NumPy):
-        #(datanorm[0, :] - время верхних пиков, сек; datanorm[1, :] - значение верхних пиков; datanorm[2, :] - время нижних пиков, сек; datanorm[3, :] - значение нижних пиков).
-        zeroboard = self.zeropoint(datanorm, np.min(data[1, :])) #граница ухода с начального плато (плато нулей) (одномерный массив (NumPy): [0] - координата границы, сек; [1] - индекс этой точки в datanorm).
-        deltamin = self.mindeltapoint(datanorm, zeroboard[1]) # точка с минимальной шириной графика (одномерный массив (NumPy): [0] - ширина; [1] - координата, сек).
-        plato = self.platopoint(datanorm, zeroboard[1], deltamin, sigma) # границы центрального плато (возле deltamin) plato - двухмерный массив (NumPy):
-        #([0/1/2, 0]- координата левой/правой/трёхминутной границы, сек; [0/1/2, 1] - ширина графика в точке левой/правой/трёхминутной границы).
-        #трёхминутная граница - точка, отстоящая от правой границы плато на 3 минуты.
 
-        #рисуем график
-        # любой из элементоф графика можно отключить, закомментировав его
-        # self.graph.plot(data[0,:],data[1,:])
-        self.graph.plot(datanorm[0,:],datanorm[1,:], pen=pg.mkPen(color=(0, 0, 255)))
-        self.graph.plot(datanorm[2,:],datanorm[3,:], pen=pg.mkPen(color=(0, 0, 255)))
-        self.graph.plot([zeroboard[0], zeroboard[0]],[np.min(data[1, :])-10, np.max(data[1, :])+10], name="dsf", pen=pg.mkPen(color=(142, 61, 0), width=2))
-        self.graph.plot([deltamin[1], deltamin[1]],[np.min(data[1, :])-10, np.max(data[1, :])+10], pen=pg.mkPen(color=(255, 0, 255), width=2))
-        self.graph.plot([plato[0,0], plato[0,0]],[np.min(data[1, :])-10, np.max(data[1, :])+10], pen=pg.mkPen(color=(255, 0, 166), width=2))
-        self.graph.plot([plato[1,0], plato[1,0]],[np.min(data[1, :])-10, np.max(data[1, :])+10], pen=pg.mkPen(color=(255, 165, 0), width=2))
-        self.graph.plot([plato[2,0], plato[2,0]],[np.min(data[1, :])-10, np.max(data[1, :])+10], pen=pg.mkPen(color=(0, 100, 100), width=2))
-        self.graph.showGrid(x=True, y=True)
+        try:
+            self.graph.clear()
+            sigma = 0.25 #допуск для "плато" в долях
+            period = 20
+            norm_data_list = [int(item / self.maxTopValue * 100) for item in self.data_list]
+            data = np.array([np.array(self.time), np.array(norm_data_list)])
+            # (data[0, :] - координата времени, сек; data[1, :] - значение прибора(?), соответсвующий данному моменту времени).
+            datanorm = self.contour(data, period) #перестраиваем на верхние и нижние пики. datanorm - четырёхмерный массив (NumPy):
+            #(datanorm[0, :] - время верхних пиков, сек; datanorm[1, :] - значение верхних пиков; datanorm[2, :] - время нижних пиков, сек; datanorm[3, :] - значение нижних пиков).
+            zeroboard = self.zeropoint(datanorm, np.min(data[1, :])) #граница ухода с начального плато (плато нулей) (одномерный массив (NumPy): [0] - координата границы, сек; [1] - индекс этой точки в datanorm).
+            deltamin = self.mindeltapoint(datanorm, zeroboard[1]) # точка с минимальной шириной графика (одномерный массив (NumPy): [0] - ширина; [1] - координата, сек).
+            plato = self.platopoint(datanorm, zeroboard[1], deltamin, sigma) # границы центрального плато (возле deltamin) plato - двухмерный массив (NumPy):
+            #([0/1/2, 0]- координата левой/правой/трёхминутной границы, сек; [0/1/2, 1] - ширина графика в точке левой/правой/трёхминутной границы).
+            #трёхминутная граница - точка, отстоящая от правой границы плато на 3 минуты.
+
+            #рисуем график
+            # любой из элементоф графика можно отключить, закомментировав его
+            # self.graph.plot(data[0,:],data[1,:])
+
+            self.graph_data = [zeroboard[0], deltamin[0], deltamin[1], plato[0, 1], plato[0, 0], plato[1, 1], plato[1, 0],
+                               plato[2, 1], plato[2, 0]]
+
+            self.named_graph_data = ["Граница нулевого плато, сек",
+                                     "Минимальная ширина графика", "Время минимальная ширина графика, сек",
+                                     "Ширина левой границы плато", "Время левая границы плато, сек",
+                                     "Ширина правой границы плато", "Время правой границы плато, сек",
+                                     "Ширина через 3 минуты после правой границы плато", "Время через 3 минуты после правой границы плато"]
+
+            self.graph.plot(self.time, norm_data_list, pen=self.pen)
+            self.graph.plot(datanorm[0,:],datanorm[1,:], pen=pg.mkPen(color=(0, 0, 255)))
+            self.graph.plot(datanorm[2, :], datanorm[3, :], name="Границы", pen=pg.mkPen(color=(0, 0, 255)))
+            self.graph.plot([zeroboard[0], zeroboard[0]], [np.min(data[1, :])-10, np.max(data[1, :])+10], name=f'Граница нулевого плато, t = {zeroboard[0]} сек', pen=pg.mkPen(color=(142, 61, 0), width=2))
+            self.graph.plot([deltamin[1], deltamin[1]], [np.min(data[1, :])-10, np.max(data[1, :])+10], name=f'Минимальная ширина графика, ширина = {deltamin[0]}, t = {deltamin[1]} сек', pen=pg.mkPen(color=(255, 0, 255), width=2))
+            self.graph.plot([plato[0, 0], plato[0, 0]], [np.min(data[1, :])-10, np.max(data[1, :])+10], name=f'Левая граница плато, ширина = {plato[0, 1]}, t = {plato[0, 0]} сек', pen=pg.mkPen(color=(255, 100, 166), width=2))
+            self.graph.plot([plato[1, 0], plato[1, 0]], [np.min(data[1, :])-10, np.max(data[1, :])+10], name=f'Правая граница плато, ширина = {plato[1, 1]}, t = {plato[1, 0]} сек', pen=pg.mkPen(color=(255, 165, 0), width=2))
+            self.graph.plot([plato[2, 0], plato[2, 0]], [np.min(data[1, :])-10, np.max(data[1, :])+10], name=f'3 минуты после правой границы плато, ширина = {plato[2, 1]}, t = {plato[2,0]} сек', pen=pg.mkPen(color=(0, 100, 100), width=2))
+            self.graph.showGrid(x=True, y=True)
+        except:
+            print("err")
 
 
 

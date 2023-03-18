@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1535</width>
-    <height>798</height>
+    <width>1355</width>
+    <height>712</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -70,23 +70,23 @@
      <rect>
       <x>20</x>
       <y>60</y>
-      <width>1091</width>
-      <height>601</height>
+      <width>991</width>
+      <height>551</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="saveButton">
     <property name="geometry">
      <rect>
-      <x>1200</x>
-      <y>710</y>
+      <x>1100</x>
+      <y>640</y>
       <width>151</width>
       <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
+      <pointsize>11</pointsize>
      </font>
     </property>
     <property name="text">
@@ -114,11 +114,16 @@
    <widget class="QWidget" name="horizontalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>1130</x>
+      <x>1030</x>
       <y>100</y>
       <width>301</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
@@ -137,7 +142,7 @@
       <widget class="QLineEdit" name="nameEdit">
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <pointsize>11</pointsize>
         </font>
        </property>
       </widget>
@@ -147,18 +152,23 @@
    <widget class="QWidget" name="horizontalLayoutWidget_3">
     <property name="geometry">
      <rect>
-      <x>1130</x>
-      <y>140</y>
+      <x>1030</x>
+      <y>130</y>
       <width>301</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QLabel" name="label_5">
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <pointsize>11</pointsize>
         </font>
        </property>
        <property name="text">
@@ -170,7 +180,7 @@
       <widget class="QLineEdit" name="numEdit">
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <pointsize>11</pointsize>
         </font>
        </property>
       </widget>
@@ -180,7 +190,7 @@
    <widget class="QDateTimeEdit" name="dateTimeEdit">
     <property name="geometry">
      <rect>
-      <x>1190</x>
+      <x>1090</x>
       <y>20</y>
       <width>181</width>
       <height>31</height>
@@ -188,22 +198,22 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
+      <pointsize>11</pointsize>
      </font>
     </property>
    </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>1130</x>
-      <y>310</y>
+      <x>1030</x>
+      <y>300</y>
       <width>161</width>
       <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
+      <pointsize>11</pointsize>
      </font>
     </property>
     <property name="text">
@@ -213,15 +223,15 @@
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>1130</x>
-      <y>170</y>
+      <x>1030</x>
+      <y>160</y>
       <width>299</width>
       <height>29</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
+      <pointsize>11</pointsize>
      </font>
     </property>
     <property name="text">
@@ -231,48 +241,53 @@
    <widget class="QPlainTextEdit" name="diagnosisEdit">
     <property name="geometry">
      <rect>
-      <x>1130</x>
-      <y>200</y>
+      <x>1030</x>
+      <y>190</y>
       <width>301</width>
       <height>111</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
+      <pointsize>11</pointsize>
      </font>
     </property>
    </widget>
    <widget class="QPlainTextEdit" name="conditionEdit">
     <property name="geometry">
      <rect>
-      <x>1130</x>
-      <y>340</y>
+      <x>1030</x>
+      <y>330</y>
       <width>301</width>
       <height>121</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
+      <pointsize>11</pointsize>
      </font>
     </property>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_4">
     <property name="geometry">
      <rect>
-      <x>1130</x>
-      <y>470</y>
+      <x>1030</x>
+      <y>460</y>
       <width>301</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
       <widget class="QLabel" name="label_7">
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <pointsize>11</pointsize>
         </font>
        </property>
        <property name="text">
@@ -281,25 +296,36 @@
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="fibrinogenEdit"/>
+      <widget class="QDoubleSpinBox" name="fibrinogenEdit">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_5">
     <property name="geometry">
      <rect>
-      <x>1130</x>
-      <y>510</y>
+      <x>1030</x>
+      <y>490</y>
       <width>301</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
       <widget class="QLabel" name="label_8">
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <pointsize>11</pointsize>
         </font>
        </property>
        <property name="text">
@@ -308,25 +334,36 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="ptiEdit"/>
+      <widget class="QSpinBox" name="ptiEdit">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_6">
     <property name="geometry">
      <rect>
-      <x>1130</x>
-      <y>550</y>
+      <x>1030</x>
+      <y>520</y>
       <width>301</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_7">
      <item>
       <widget class="QLabel" name="label_9">
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <pointsize>11</pointsize>
         </font>
        </property>
        <property name="text">
@@ -335,25 +372,36 @@
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="mnoEdit"/>
+      <widget class="QDoubleSpinBox" name="mnoEdit">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_7">
     <property name="geometry">
      <rect>
-      <x>1130</x>
-      <y>590</y>
+      <x>1030</x>
+      <y>550</y>
       <width>301</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_8">
      <item>
       <widget class="QLabel" name="label_10">
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <pointsize>11</pointsize>
         </font>
        </property>
        <property name="text">
@@ -363,6 +411,11 @@
      </item>
      <item>
       <widget class="QSpinBox" name="actvEdit">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="maximum">
         <number>999</number>
        </property>
@@ -373,18 +426,23 @@
    <widget class="QWidget" name="horizontalLayoutWidget_8">
     <property name="geometry">
      <rect>
-      <x>1130</x>
-      <y>630</y>
+      <x>1030</x>
+      <y>580</y>
       <width>301</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_9">
      <item>
       <widget class="QLabel" name="label_11">
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <pointsize>11</pointsize>
         </font>
        </property>
        <property name="text">
@@ -394,6 +452,11 @@
      </item>
      <item>
       <widget class="QSpinBox" name="actEdit">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="maximum">
         <number>999</number>
        </property>
@@ -404,18 +467,23 @@
    <widget class="QWidget" name="horizontalLayoutWidget_9">
     <property name="geometry">
      <rect>
-      <x>1130</x>
-      <y>670</y>
+      <x>1030</x>
+      <y>610</y>
       <width>301</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_10">
      <item>
       <widget class="QLabel" name="label_12">
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <pointsize>11</pointsize>
         </font>
        </property>
        <property name="text">
@@ -425,6 +493,11 @@
      </item>
      <item>
       <widget class="QSpinBox" name="ddimerEdit">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="maximum">
         <number>999</number>
        </property>
@@ -435,7 +508,7 @@
    <widget class="QPushButton" name="importButton">
     <property name="geometry">
      <rect>
-      <x>700</x>
+      <x>680</x>
       <y>20</y>
       <width>181</width>
       <height>31</height>
@@ -453,9 +526,9 @@
    <widget class="QWidget" name="horizontalLayoutWidget_10">
     <property name="geometry">
      <rect>
-      <x>890</x>
+      <x>860</x>
       <y>20</y>
-      <width>221</width>
+      <width>211</width>
       <height>31</height>
      </rect>
     </property>
@@ -487,7 +560,7 @@
    <widget class="QDateTimeEdit" name="dateTimeEdit_2">
     <property name="geometry">
      <rect>
-      <x>1190</x>
+      <x>1090</x>
       <y>60</y>
       <width>181</width>
       <height>31</height>
@@ -495,7 +568,7 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
+      <pointsize>11</pointsize>
      </font>
     </property>
    </widget>
@@ -503,7 +576,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>680</y>
+      <y>620</y>
       <width>191</width>
       <height>31</height>
      </rect>
@@ -523,7 +596,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1535</width>
+     <width>1355</width>
      <height>21</height>
     </rect>
    </property>
