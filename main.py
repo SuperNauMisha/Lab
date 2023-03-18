@@ -46,6 +46,7 @@ class MyWidget(QMainWindow):
                                    "Диагноз", "Обстоятельства", "Фибриноген", "ПТИ", "МНО", "АЧТВ", "ACT", "Д-Димер"]
         self.interferences = 0
         self.data_list = []
+        self.norm_data_list = []
         self.time = []
         self.now_time = 0
 
@@ -91,6 +92,7 @@ class MyWidget(QMainWindow):
         self.oldstrok_data = ''
         self.strok_data = ''
         self.data_list = []
+        self.norm_data_list = []
         self.time = []
         self.graph_data = []
         self.now_time = 0
@@ -124,8 +126,8 @@ class MyWidget(QMainWindow):
                     self.data_list.append(int(str(self.oldstrok_data + self.strok_data)[0:-4]))
                     self.oldstrok_data = ''
                     self.time.append(self.now_time)
-                    norm_data_list = [int(item / self.maxTopValue * 100) for item in self.data_list]
-                    self.graph.plot(self.time, norm_data_list, pen=self.pen)
+                    self.norm_data_list.append(self.data_list[-1] / self.maxTopValue * 100)
+                    self.graph.plot(self.time, self.norm_data_list, pen=self.pen)
 
                     self.now_time += 0.5
         except Exception as err:
