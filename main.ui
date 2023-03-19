@@ -91,7 +91,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Сохранить в Exel</string>
+     <string>Сохранить в Excel</string>
     </property>
    </widget>
    <widget class="QPushButton" name="clearButton">
@@ -521,7 +521,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Импортировать из Exel</string>
+     <string>Импортировать из Excel</string>
     </property>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_10">
@@ -588,7 +588,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Расчитать</string>
+     <string>Рассчитать</string>
     </property>
    </widget>
    <widget class="QPlainTextEdit" name="output">
