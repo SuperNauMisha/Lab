@@ -26,7 +26,6 @@ class MyWidget(QMainWindow):
         self.setWindowTitle("Коагулограф")
         self.dt_now = datetime.datetime.today()
         self.dateTimeEdit.setDateTime(self.dt_now)
-        self.dateTimeEdit_2.setDateTime(self.dt_now)
         self.interferences = 0
         self.connectButton.clicked.connect(self.buttonConDis)
         self.saveButton.clicked.connect(self.save)
@@ -43,7 +42,7 @@ class MyWidget(QMainWindow):
         self.graph.setBackground('w')
         self.pen = pg.mkPen(color=(255, 0, 0))
 
-        self.named_data_patient = ["Дата и время", "Дополнительные дата и время", "ФИО", "№ Истории болезни",
+        self.named_data_patient = ["Дата и время", "ФИО", "№ Истории болезни",
                                    "Диагноз", "Обстоятельства", "Фибриноген", "ПТИ", "МНО", "АЧТВ", "ACT", "Д-Димер"]
         self.interferences = 0
         self.data_list = []
@@ -104,7 +103,6 @@ class MyWidget(QMainWindow):
         self.output.clear()
         self.dt_now = datetime.datetime.today()
         self.dateTimeEdit.setDateTime(self.dt_now)
-        self.dateTimeEdit_2.setDateTime(self.dt_now)
         self.graph.clear()
         self.fibrinogenEdit.setValue(0)
         self.ptiEdit.setValue(0)
@@ -135,8 +133,7 @@ class MyWidget(QMainWindow):
             print("err", err)
 
     def save(self):
-        data_patient = [self.dateTimeEdit.dateTime().toString('dd.MM.yyyy hh:mm'),
-                        self.dateTimeEdit_2.dateTime().toString('dd.MM.yyyy hh:mm'), self.nameEdit.text(),
+        data_patient = [self.dateTimeEdit.dateTime().toString('dd.MM.yyyy hh:mm'), self.nameEdit.text(),
                         self.numEdit.text(), self.diagnosisEdit.toPlainText(), self.conditionEdit.toPlainText(),
                         self.fibrinogenEdit.value(), self.ptiEdit.value(), self.mnoEdit.value(), self.actvEdit.value(),
                         self.actEdit.value(), self.ddimerEdit.value()]
@@ -177,8 +174,7 @@ class MyWidget(QMainWindow):
         filename = QFileDialog.getOpenFileName(self, "Импортировать из таблицы", '', "*.xlsx")
         wb = openpyxl.load_workbook(filename[0])
         sh_names = wb.sheetnames
-        ind = self.numListEdit.value()
-        sheet = wb[sh_names[ind - 1]]
+        sheet = wb[sh_names[0]]
         row = 1
         while True:
             row += 1
@@ -208,7 +204,6 @@ class MyWidget(QMainWindow):
             datetime_str2 = data_patient[1]
             datetime2 = datetime.datetime.strptime(datetime_str2, '%d.%m.%Y %H:%M')
             self.dateTimeEdit.setDateTime(datetime1)
-            self.dateTimeEdit_2.setDateTime(datetime2)
             self.nameEdit.setText(data_patient[2])
             self.numEdit.setText(data_patient[3])
             self.diagnosisEdit.setPlainText(data_patient[4])
@@ -258,18 +253,20 @@ class MyWidget(QMainWindow):
 
 
 
-            self.named_graph_data = ["Время свёртывания, сек",
-                                     "Время до начала свёртывания, сек",
+            self.named_graph_data = ["Время до начала свёртывания, сек",
                                      "Время до окончания свёртывания, сек",
+                                     "Длительность свёртывания, сек",
                                      "Время до начала ретракции, сек",
-                                     "Время окончания ретракции, сек",
+                                     "Время до окончания ретракции, сек",
+                                     "Длительность ретракции, сек",
                                      "Максимальная амплитуда, ед",
                                      "Минимальная амплитуда, ед",
                                      "Амплитуда на 3 минуте фибринолиза, ед",
                                      "Скорость свёртывания, ед/мин",
                                      "Скорость нарастания фибринолиза, ед/мин",
                                      "Коэффицент ректракции, %",
-                                     "Коэффицент фибринолиза, %"]
+                                     "Коэффицент фибринолиза, %",
+                                     "Активность фибринолиза, %"]
 
 
             t_clotting = round(plato[0, 0] - zeroboard[0], 2) #Время свёртывания, сек
@@ -277,18 +274,20 @@ class MyWidget(QMainWindow):
             cof_retr = round((datanorm[1, zeroboard[1]] - deltamin[0]) / datanorm[1, zeroboard[1]] * 100, 2) #Коэффицент ректракции, %
             v_fibrin = round((plato[2, 1] - plato[1, 1]) / 180 * 60, 2) #Скорость нарастания фибринолиза, ед/сек
             cof_fibrin = round((plato[2, 1] - deltamin[0]) / plato[2, 1] * 100, 2) #Коэффицент фибринолиза, %
+            act_fibrin = round(plato[2, 1] / (datanorm[1, zeroboard[1]] - deltamin[0]) * 100, 2)
 
-
-            self.graph_data = [t_clotting, zeroboard[0], deltamin[1], plato[0, 0], plato[1, 0],
-                               datanorm[1, zeroboard[1]], deltamin[0], plato[2, 1],
+            self.graph_data = [zeroboard[0], deltamin[1], t_clotting, plato[0, 0], plato[1, 0],
+                               plato[1, 0] - plato[0, 0], datanorm[1, zeroboard[1]], deltamin[0], plato[2, 1],
                                v_clotting, v_fibrin,
-                               cof_retr, cof_fibrin]
+                               cof_retr, cof_fibrin, act_fibrin]
 
-            strok_output = "Время свёртывания, сек" + " " * (40 - len("Время свёртывания, сек")) + str(t_clotting) + "\n"
-            strok_output += "Время до начала свёртывания, сек" + " " * (40 - len("Время до начала свёртывания, сек")) + str(zeroboard[0]) + "\n"
+
+            strok_output = "Время до начала свёртывания, сек" + " " * (40 - len("Время до начала свёртывания, сек")) + str(zeroboard[0]) + "\n"
             strok_output += "Время до окончания свёртывания, сек" + " " * (40 - len("Время до окончания свёртывания, сек")) + str(deltamin[1]) + "\n"
+            strok_output += "Длительность свёртывания, сек" + " " * (40 - len("Длительность свёртывания, сек")) + str(t_clotting) + "\n"
             strok_output += "Время до начала ретракции, сек" + " " * (40 - len("Время до начала ретракции, сек")) + str(plato[0, 0]) + "\n"
-            strok_output += "Время окончания ретракции, сек" + " " * (40 - len("Время окончания ретракции, сек")) + str(plato[1, 0]) + "\n"
+            strok_output += "Время до окончания ретракции, сек" + " " * (40 - len("Время до окончания ретракции, сек")) + str(plato[1, 0]) + "\n"
+            strok_output += "Длительность ретракции, сек" + " " * (40 - len("Длительность ретракции, сек")) + str(plato[1, 0] - plato[0, 0]) + "\n"
 
             strok_output += "Максимальная амплитуда, ед" + " " * (40 - len("Максимальная амплитуда, ед")) + str(datanorm[1, zeroboard[1]]) + "\n"
             strok_output += "Минимальная амплитуда, ед" + " " * (40 - len("Минимальная амплитуда, ед")) + str(deltamin[0]) + "\n"
@@ -299,7 +298,7 @@ class MyWidget(QMainWindow):
 
             strok_output += "Коэффицент ректракции, %" + " " * (40 - len("Коэффицент ректракции, %")) + str(cof_retr) + "\n"
             strok_output += "Коэффицент фибринолиза, %" + " " * (40 - len("Коэффицент фибринолиза, %")) + str(cof_fibrin) + "\n"
-
+            strok_output += "Активность фибринолиза, %" + " " * (40 - len("Активность фибринолиза, %")) + str(act_fibrin) + "\n"
 
             self.output.setPlainText(strok_output)
         except Exception as err:

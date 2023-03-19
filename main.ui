@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1398</width>
+    <width>1227</width>
     <height>911</height>
    </rect>
   </property>
@@ -71,17 +71,17 @@
      <rect>
       <x>20</x>
       <y>60</y>
-      <width>1011</width>
-      <height>491</height>
+      <width>871</width>
+      <height>381</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="saveButton">
     <property name="geometry">
      <rect>
-      <x>1120</x>
-      <y>750</y>
-      <width>151</width>
+      <x>950</x>
+      <y>760</y>
+      <width>201</width>
       <height>31</height>
      </rect>
     </property>
@@ -115,8 +115,8 @@
    <widget class="QWidget" name="horizontalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>100</y>
+      <x>910</x>
+      <y>110</y>
       <width>301</width>
       <height>42</height>
      </rect>
@@ -153,8 +153,8 @@
    <widget class="QWidget" name="horizontalLayoutWidget_3">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>140</y>
+      <x>910</x>
+      <y>150</y>
       <width>301</width>
       <height>42</height>
      </rect>
@@ -191,8 +191,8 @@
    <widget class="QDateTimeEdit" name="dateTimeEdit">
     <property name="geometry">
      <rect>
-      <x>1120</x>
-      <y>20</y>
+      <x>960</x>
+      <y>70</y>
       <width>181</width>
       <height>31</height>
      </rect>
@@ -206,8 +206,8 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>320</y>
+      <x>910</x>
+      <y>330</y>
       <width>161</width>
       <height>31</height>
      </rect>
@@ -224,8 +224,8 @@
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>180</y>
+      <x>910</x>
+      <y>190</y>
       <width>299</width>
       <height>29</height>
      </rect>
@@ -242,8 +242,8 @@
    <widget class="QPlainTextEdit" name="diagnosisEdit">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>210</y>
+      <x>910</x>
+      <y>220</y>
       <width>301</width>
       <height>111</height>
      </rect>
@@ -257,8 +257,8 @@
    <widget class="QPlainTextEdit" name="conditionEdit">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>350</y>
+      <x>910</x>
+      <y>360</y>
       <width>301</width>
       <height>121</height>
      </rect>
@@ -272,8 +272,8 @@
    <widget class="QWidget" name="horizontalLayoutWidget_4">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>480</y>
+      <x>910</x>
+      <y>490</y>
       <width>301</width>
       <height>42</height>
      </rect>
@@ -310,8 +310,8 @@
    <widget class="QWidget" name="horizontalLayoutWidget_5">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>520</y>
+      <x>910</x>
+      <y>530</y>
       <width>301</width>
       <height>42</height>
      </rect>
@@ -348,8 +348,8 @@
    <widget class="QWidget" name="horizontalLayoutWidget_6">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>560</y>
+      <x>910</x>
+      <y>570</y>
       <width>301</width>
       <height>42</height>
      </rect>
@@ -386,8 +386,8 @@
    <widget class="QWidget" name="horizontalLayoutWidget_7">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>600</y>
+      <x>910</x>
+      <y>610</y>
       <width>301</width>
       <height>42</height>
      </rect>
@@ -427,8 +427,8 @@
    <widget class="QWidget" name="horizontalLayoutWidget_8">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>640</y>
+      <x>910</x>
+      <y>650</y>
       <width>301</width>
       <height>42</height>
      </rect>
@@ -468,8 +468,8 @@
    <widget class="QWidget" name="horizontalLayoutWidget_9">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>680</y>
+      <x>910</x>
+      <y>690</y>
       <width>301</width>
       <height>42</height>
      </rect>
@@ -500,7 +500,7 @@
         </font>
        </property>
        <property name="maximum">
-        <number>999</number>
+        <number>99999</number>
        </property>
       </widget>
      </item>
@@ -511,7 +511,7 @@
      <rect>
       <x>680</x>
       <y>20</y>
-      <width>181</width>
+      <width>361</width>
       <height>31</height>
      </rect>
     </property>
@@ -524,60 +524,11 @@
      <string>Импортировать из Excel</string>
     </property>
    </widget>
-   <widget class="QWidget" name="horizontalLayoutWidget_10">
-    <property name="geometry">
-     <rect>
-      <x>860</x>
-      <y>20</y>
-      <width>250</width>
-      <height>38</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_11">
-     <item>
-      <widget class="QLabel" name="label_13">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Номер листа таблицы:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="numListEdit">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>1</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QDateTimeEdit" name="dateTimeEdit_2">
-    <property name="geometry">
-     <rect>
-      <x>1120</x>
-      <y>60</y>
-      <width>181</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>11</pointsize>
-     </font>
-    </property>
-   </widget>
    <widget class="QPushButton" name="calculateButon">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>560</y>
+      <y>450</y>
       <width>191</width>
       <height>31</height>
      </rect>
@@ -595,9 +546,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>600</y>
-      <width>841</width>
-      <height>261</height>
+      <y>490</y>
+      <width>871</width>
+      <height>371</height>
      </rect>
     </property>
     <property name="font">
@@ -616,7 +567,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1398</width>
+     <width>1227</width>
      <height>21</height>
     </rect>
    </property>
