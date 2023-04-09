@@ -43,8 +43,8 @@ class MyWidget(QMainWindow):
         self.graph.setBackground('w')
         self.pen = pg.mkPen(color=(255, 0, 0))
 
-        self.named_data_patient = ["Дата и время", "ФИО", "№ Истории болезни",
-                                   "Диагноз", "Обстоятельства", "Фибриноген", "ПТИ", "МНО", "АЧТВ", "ACT", "Д-Димер", "Доп. время(сек)"]
+        self.named_data_patient = ["Дата и время", "Доп. время(сек)", "ФИО", "№ Истории болезни",
+                                   "Диагноз", "Обстоятельства", "Фибриноген", "ПТИ", "МНО", "АЧТВ", "ACT", "Д-Димер", "Тромбоциты", "Препараты"]
         self.interferences = 0
         self.data_list = []
         self.norm_data_list = []
@@ -70,6 +70,8 @@ class MyWidget(QMainWindow):
     def buttonConDis(self):
         if self.connectButton.text() == "Начать":
             self.connectButton.setText("Остановить")
+            self.dt_now = datetime.datetime.today()
+            self.dateTimeEdit.setDateTime(self.dt_now)
             self.onConnect()
         elif self.connectButton.text() == "Остановить":
             self.connectButton.setText("Начать")
@@ -113,8 +115,10 @@ class MyWidget(QMainWindow):
         self.actEdit.setValue(0)
         self.addTimeEdit.setValue(0)
         self.ddimerEdit.setValue(0)
+        self.trombEdit.setValue(0)
         self.beforeClottingSlider.setValue(0)
         self.afterClottingSlider.setValue(0)
+        self.medicationEdit.clear()
 
     def onRead(self):
         try:
@@ -141,10 +145,10 @@ class MyWidget(QMainWindow):
             print("err", err)
 
     def save(self):
-        data_patient = [self.dateTimeEdit.dateTime().toString('dd.MM.yyyy hh:mm'), self.nameEdit.text(),
+        data_patient = [self.dateTimeEdit.dateTime().toString('dd.MM.yyyy hh:mm'), self.addTimeEdit.value(),  self.nameEdit.text(),
                         self.numEdit.text(), self.diagnosisEdit.toPlainText(), self.conditionEdit.toPlainText(),
                         self.fibrinogenEdit.value(), self.ptiEdit.value(), self.mnoEdit.value(), self.actvEdit.value(),
-                        self.actEdit.value(), self.ddimerEdit.value(), self.addTimeEdit.value()]
+                        self.actEdit.value(), self.ddimerEdit.value(), self.trombEdit.value(), self.medicationEdit.toPlainText()]
         wb = openpyxl.Workbook()
         wb.create_sheet(title='Первый лист', index=0)
         sheet = wb['Первый лист']
@@ -209,19 +213,26 @@ class MyWidget(QMainWindow):
                 data_patient.append(val)
             datetime_str1 = data_patient[0]
             datetime1 = datetime.datetime.strptime(datetime_str1, '%d.%m.%Y %H:%M')
-            self.nameEdit.setText(data_patient[1])
-            self.numEdit.setText(data_patient[2])
-            self.diagnosisEdit.setPlainText(data_patient[3])
-            self.conditionEdit.setPlainText(data_patient[4])
-            self.fibrinogenEdit.setValue(data_patient[5])
-            self.ptiEdit.setValue(data_patient[6])
-            self.mnoEdit.setValue(data_patient[7])
-            self.actvEdit.setValue(data_patient[8])
-            self.actEdit.setValue(data_patient[9])
-            self.ddimerEdit.setValue(data_patient[10])
-            self.addTimeEdit.setValue(data_patient[11])
+            self.nameEdit.setText(data_patient[2])
+            self.numEdit.setText(data_patient[3])
+            self.diagnosisEdit.setPlainText(data_patient[4])
+            self.conditionEdit.setPlainText(data_patient[5])
+            self.fibrinogenEdit.setValue(data_patient[6])
+            self.ptiEdit.setValue(data_patient[7])
+            self.mnoEdit.setValue(data_patient[8])
+            self.actvEdit.setValue(data_patient[9])
+            self.actEdit.setValue(data_patient[10])
+            self.ddimerEdit.setValue(data_patient[11])
         except Exception as err:
             print(err)
+
+        try:
+            self.addTimeEdit.setValue(data_patient[1])
+            self.trombEdit.setValue(data_patient[12])
+            self.medicationEdit.setPlainText(data_patient[13])
+        except Exception as err:
+            print(err)
+
         try:
             sigma = 0.25 #допуск для "плато" в долях
             period = 20

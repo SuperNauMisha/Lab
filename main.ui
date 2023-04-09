@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1235</width>
+    <width>1228</width>
     <height>911</height>
    </rect>
   </property>
@@ -80,7 +80,7 @@
     <property name="geometry">
      <rect>
       <x>950</x>
-      <y>800</y>
+      <y>830</y>
       <width>201</width>
       <height>31</height>
      </rect>
@@ -207,7 +207,7 @@
     <property name="geometry">
      <rect>
       <x>910</x>
-      <y>370</y>
+      <y>330</y>
       <width>161</width>
       <height>31</height>
      </rect>
@@ -245,7 +245,7 @@
       <x>910</x>
       <y>260</y>
       <width>301</width>
-      <height>111</height>
+      <height>71</height>
      </rect>
     </property>
     <property name="font">
@@ -258,9 +258,9 @@
     <property name="geometry">
      <rect>
       <x>910</x>
-      <y>400</y>
+      <y>360</y>
       <width>301</width>
-      <height>121</height>
+      <height>71</height>
      </rect>
     </property>
     <property name="font">
@@ -710,13 +710,87 @@ selection-background-color: rgb(255, 0, 255);</string>
      </item>
     </layout>
    </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_12">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>770</y>
+      <width>301</width>
+      <height>42</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_12">
+     <item>
+      <widget class="QLabel" name="label_14">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Тромбоциты</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="trombEdit">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="maximum">
+        <number>1000</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QPlainTextEdit" name="medicationEdit">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>460</y>
+      <width>301</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>430</y>
+      <width>161</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Препараты:</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1235</width>
+     <width>1228</width>
      <height>21</height>
     </rect>
    </property>
