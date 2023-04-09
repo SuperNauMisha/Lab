@@ -22,7 +22,8 @@ class MyWidget(QMainWindow):
         self.maxTopValue = 250
         self.maxRightValue = 2000
 
-
+        self.output_rate = 10
+        self.counter_rate = 0
         self.setWindowTitle("Коагулограф")
         self.dt_now = datetime.datetime.today()
         self.dateTimeEdit.setDateTime(self.dt_now)
@@ -43,12 +44,13 @@ class MyWidget(QMainWindow):
         self.pen = pg.mkPen(color=(255, 0, 0))
 
         self.named_data_patient = ["Дата и время", "ФИО", "№ Истории болезни",
-                                   "Диагноз", "Обстоятельства", "Фибриноген", "ПТИ", "МНО", "АЧТВ", "ACT", "Д-Димер"]
+                                   "Диагноз", "Обстоятельства", "Фибриноген", "ПТИ", "МНО", "АЧТВ", "ACT", "Д-Димер", "Доп. время(сек)"]
         self.interferences = 0
         self.data_list = []
         self.norm_data_list = []
         self.time = []
         self.now_time = 0
+        self.addTime = 0
 
         self.ports_name_list = []
         self.ports_num_list = []
@@ -109,7 +111,10 @@ class MyWidget(QMainWindow):
         self.mnoEdit.setValue(0)
         self.actvEdit.setValue(0)
         self.actEdit.setValue(0)
+        self.addTimeEdit.setValue(0)
         self.ddimerEdit.setValue(0)
+        self.beforeClottingSlider.setValue(0)
+        self.afterClottingSlider.setValue(0)
 
     def onRead(self):
         try:
@@ -126,7 +131,10 @@ class MyWidget(QMainWindow):
                     self.oldstrok_data = ''
                     self.time.append(self.now_time)
                     self.norm_data_list.append(self.data_list[-1] / self.maxTopValue * 100)
-                    self.graph.plot(self.time, self.norm_data_list, pen=self.pen)
+                    self.counter_rate += 1
+                    if self.counter_rate >= self.output_rate:
+                        self.graph.plot(self.time, self.norm_data_list, pen=self.pen)
+                        self.counter_rate = 0
 
                     self.now_time += 0.5
         except Exception as err:
@@ -136,7 +144,7 @@ class MyWidget(QMainWindow):
         data_patient = [self.dateTimeEdit.dateTime().toString('dd.MM.yyyy hh:mm'), self.nameEdit.text(),
                         self.numEdit.text(), self.diagnosisEdit.toPlainText(), self.conditionEdit.toPlainText(),
                         self.fibrinogenEdit.value(), self.ptiEdit.value(), self.mnoEdit.value(), self.actvEdit.value(),
-                        self.actEdit.value(), self.ddimerEdit.value()]
+                        self.actEdit.value(), self.ddimerEdit.value(), self.addTimeEdit.value()]
         wb = openpyxl.Workbook()
         wb.create_sheet(title='Первый лист', index=0)
         sheet = wb['Первый лист']
@@ -201,21 +209,37 @@ class MyWidget(QMainWindow):
                 data_patient.append(val)
             datetime_str1 = data_patient[0]
             datetime1 = datetime.datetime.strptime(datetime_str1, '%d.%m.%Y %H:%M')
-            datetime_str2 = data_patient[1]
-            datetime2 = datetime.datetime.strptime(datetime_str2, '%d.%m.%Y %H:%M')
-            self.dateTimeEdit.setDateTime(datetime1)
-            self.nameEdit.setText(data_patient[2])
-            self.numEdit.setText(data_patient[3])
-            self.diagnosisEdit.setPlainText(data_patient[4])
-            self.conditionEdit.setPlainText(data_patient[5])
-            self.fibrinogenEdit.setValue(data_patient[6])
-            self.ptiEdit.setValue(data_patient[7])
-            self.mnoEdit.setValue(data_patient[8])
-            self.actvEdit.setValue(data_patient[9])
-            self.actEdit.setValue(data_patient[10])
-            self.ddimerEdit.setValue(data_patient[11])
-        except:
-            pass
+            self.nameEdit.setText(data_patient[1])
+            self.numEdit.setText(data_patient[2])
+            self.diagnosisEdit.setPlainText(data_patient[3])
+            self.conditionEdit.setPlainText(data_patient[4])
+            self.fibrinogenEdit.setValue(data_patient[5])
+            self.ptiEdit.setValue(data_patient[6])
+            self.mnoEdit.setValue(data_patient[7])
+            self.actvEdit.setValue(data_patient[8])
+            self.actEdit.setValue(data_patient[9])
+            self.ddimerEdit.setValue(data_patient[10])
+            self.addTimeEdit.setValue(data_patient[11])
+        except Exception as err:
+            print(err)
+        try:
+            sigma = 0.25 #допуск для "плато" в долях
+            period = 20
+            norm_data_list = [int(item / self.maxTopValue * 100) for item in self.data_list]
+            data = np.array([np.array(self.time), np.array(norm_data_list)])
+            self.addTime = self.addTimeEdit.value()
+            # (data[0, :] - координата времени, сек; data[1, :] - значение прибора(?), соответсвующий данному моменту времени).
+            datanorm = self.contour(data, period) #перестраиваем на верхние и нижние пики. datanorm - четырёхмерный массив (NumPy):
+            #(datanorm[0, :] - время верхних пиков, сек; datanorm[1, :] - значение верхних пиков; datanorm[2, :] - время нижних пиков, сек; datanorm[3, :] - значение нижних пиков).
+            zeroboard = self.zeropoint(datanorm, np.min(data[1, :])) #граница ухода с начального плато (плато нулей) (одномерный массив (NumPy): [0] - координата границы, сек; [1] - индекс этой точки в datanorm).
+            deltamin = self.mindeltapoint(datanorm, zeroboard[1]) # точка с минимальной шириной графика (одномерный массив (NumPy): [0] - ширина; [1] - координата, сек; [2] - индекс точки в datanorm).
+
+            self.beforeClottingSlider.setValue(int(zeroboard[0]))
+            self.afterClottingSlider.setValue(int(deltamin[1]))
+            self.calculate()
+
+        except Exception as err:
+            print(err)
 
     def calculate(self):
 
@@ -225,11 +249,28 @@ class MyWidget(QMainWindow):
             period = 20
             norm_data_list = [int(item / self.maxTopValue * 100) for item in self.data_list]
             data = np.array([np.array(self.time), np.array(norm_data_list)])
+            self.addTime = self.addTimeEdit.value()
             # (data[0, :] - координата времени, сек; data[1, :] - значение прибора(?), соответсвующий данному моменту времени).
             datanorm = self.contour(data, period) #перестраиваем на верхние и нижние пики. datanorm - четырёхмерный массив (NumPy):
             #(datanorm[0, :] - время верхних пиков, сек; datanorm[1, :] - значение верхних пиков; datanorm[2, :] - время нижних пиков, сек; datanorm[3, :] - значение нижних пиков).
             zeroboard = self.zeropoint(datanorm, np.min(data[1, :])) #граница ухода с начального плато (плато нулей) (одномерный массив (NumPy): [0] - координата границы, сек; [1] - индекс этой точки в datanorm).
+            zeroboard[0] = self.beforeClottingSlider.value()
+
+            for i in range(len(datanorm[0, :])):
+                if datanorm[0, i] >= zeroboard[0]:
+                    zeroboard[1] = i
+                    break
+
             deltamin = self.mindeltapoint(datanorm, zeroboard[1]) # точка с минимальной шириной графика (одномерный массив (NumPy): [0] - ширина; [1] - координата, сек; [2] - индекс точки в datanorm).
+            print(deltamin)
+            deltamin[1] = self.afterClottingSlider.value()
+
+            for i in range(len(datanorm[0, :])):
+                if datanorm[0, i] >= deltamin[1]:
+                    deltamin[2] = i
+                    deltamin[0] = datanorm[1, i] - datanorm[3, i]
+                    break
+
             plato = self.platopoint(datanorm, zeroboard[1], deltamin, sigma) # границы центрального плато (возле deltamin) plato - двухмерный массив (NumPy):
             #([0/1/2, 0]- координата левой/правой/трёхминутной границы, сек; [0/1/2, 1] - ширина графика в точке левой/правой/трёхминутной границы).
             #трёхминутная граница - точка, отстоящая от правой границы плато на 3 минуты.
@@ -276,18 +317,18 @@ class MyWidget(QMainWindow):
             cof_fibrin = round((plato[2, 1] - deltamin[0]) / plato[2, 1] * 100, 2) #Коэффицент фибринолиза, %
             act_fibrin = round(plato[2, 1] / (datanorm[1, zeroboard[1]] - deltamin[0]) * 100, 2)
 
-            self.graph_data = [zeroboard[0], deltamin[1], t_clotting, plato[0, 0], plato[1, 0],
+            self.graph_data = [zeroboard[0] + self.addTime, deltamin[1] + self.addTime, t_clotting, plato[0, 0] + self.addTime, plato[1, 0],
                                plato[1, 0] - plato[0, 0], datanorm[1, zeroboard[1]], deltamin[0], plato[2, 1],
                                v_clotting, v_fibrin,
                                cof_retr, cof_fibrin, act_fibrin]
 
 
-            strok_output = "Время до начала свёртывания, сек" + " " * (40 - len("Время до начала свёртывания, сек")) + str(zeroboard[0]) + "\n"
-            strok_output += "Время до окончания свёртывания, сек" + " " * (40 - len("Время до окончания свёртывания, сек")) + str(deltamin[1]) + "\n"
-            strok_output += "Длительность свёртывания, сек" + " " * (40 - len("Длительность свёртывания, сек")) + str(t_clotting) + "\n"
-            strok_output += "Время до начала ретракции, сек" + " " * (40 - len("Время до начала ретракции, сек")) + str(plato[0, 0]) + "\n"
-            strok_output += "Время до окончания ретракции, сек" + " " * (40 - len("Время до окончания ретракции, сек")) + str(plato[1, 0]) + "\n"
-            strok_output += "Длительность ретракции, сек" + " " * (40 - len("Длительность ретракции, сек")) + str(plato[1, 0] - plato[0, 0]) + "\n"
+            strok_output = "Время до начала свёртывания, сек" + " " * (40 - len("Время до начала свёртывания, сек")) + str(zeroboard[0] + self.addTime) + " " * (10 - len(str(zeroboard[0] + self.addTime))) + self.secToMin(zeroboard[0] + self.addTime) + "\n"
+            strok_output += "Время до окончания свёртывания, сек" + " " * (40 - len("Время до окончания свёртывания, сек")) + str(deltamin[1] + self.addTime) + " " * (10 - len(str(deltamin[1] + self.addTime))) + self.secToMin(deltamin[1] + self.addTime) + "\n"
+            strok_output += "Длительность свёртывания, сек" + " " * (40 - len("Длительность свёртывания, сек")) + str(t_clotting) + " " * (10 - len(str(t_clotting))) + self.secToMin(t_clotting) + "\n"
+            strok_output += "Время до начала ретракции, сек" + " " * (40 - len("Время до начала ретракции, сек")) + str(plato[0, 0] + self.addTime) + " " * (10 - len(str(plato[0, 0] + self.addTime))) + self.secToMin(plato[0, 0] + self.addTime) + "\n"
+            strok_output += "Время до окончания ретракции, сек" + " " * (40 - len("Время до окончания ретракции, сек")) + str(plato[1, 0] + self.addTime) + " " * (10 - len(str(plato[1, 0] + self.addTime))) + self.secToMin(plato[1, 0] + self.addTime) + "\n"
+            strok_output += "Длительность ретракции, сек" + " " * (40 - len("Длительность ретракции, сек")) + str(plato[1, 0] - plato[0, 0]) + " " * (10 - len(str(plato[1, 0] - plato[0, 0]))) + self.secToMin(plato[1, 0] - plato[0, 0]) + "\n"
 
             strok_output += "Максимальная амплитуда, ед" + " " * (40 - len("Максимальная амплитуда, ед")) + str(datanorm[1, zeroboard[1]]) + "\n"
             strok_output += "Минимальная амплитуда, ед" + " " * (40 - len("Минимальная амплитуда, ед")) + str(deltamin[0]) + "\n"
@@ -305,7 +346,10 @@ class MyWidget(QMainWindow):
             print(err)
 
 
-
+    def secToMin(self, sec):
+        min = int(sec // 60)
+        last_sec = int(sec % 60)
+        return f"({str(min)} мин {str(last_sec)} сек)"
 
 
     def contour(self, data, period):
@@ -332,7 +376,7 @@ class MyWidget(QMainWindow):
         zeroboard = np.array([0,0])
         for countnorm in range(len(datanorm[1, :])):
             if (countnorm>2) and (datanorm[3, countnorm] > min_of_data) and (datanorm[3, countnorm-1] > min_of_data) and (datanorm[3, countnorm-2] >= min_of_data):
-                zeroboard[0] = datanorm[2, countnorm-2]
+                zeroboard[0] = datanorm[2, countnorm-2]# + self.addTime
                 zeroboard[1] = countnorm-2
                 break
         return zeroboard
@@ -359,7 +403,7 @@ class MyWidget(QMainWindow):
             delta = datanorm[1, i-1] - datanorm[3, i-1]
             deltalast = datanorm[1, i-2] - datanorm[3, i-2]
             if (delta <= deltamin[0]*(1+sigma)) and (deltanext <= deltamin[0]*(1+sigma)) and (deltalast <= deltamin[0]*(1+sigma)):
-                plato[0,0] = (datanorm[0,i-2]+datanorm[2, i-2])/2
+                plato[0,0] = (datanorm[0,i-2]+datanorm[2, i-2])/2# + self.addTime
                 plato[0,1] = deltalast
 
         for i in range (int(deltamin[2]), len(datanorm[1, :])):
